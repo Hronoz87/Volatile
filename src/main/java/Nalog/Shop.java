@@ -1,23 +1,25 @@
 package Nalog;
 
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.LongAdder;
+import java.util.stream.IntStream;
 
 public class Shop {
-    AtomicLong gain = new AtomicLong();
-    long result = 0;
-    long[] array = new long[10];
 
-    public void addGain(long result) {
+    public void addGain(int[] array) {
         for (int i = 0; i < array.length; i++) {
-            array[i] = (long) ((Math.random() * 100000));
-            result += array[i];
+            array[i] = (int) (Math.random() * 100000);
         }
-        System.out.println(Thread.currentThread().getName() + " дал выручку " + result);
-        long res = gain.addAndGet(result);
-        System.out.println("Общая выручка с магазинов " + res);
     }
 
-    public long getCuurent() {
-        return gain.get();
+    public void gain(int[] array) throws InterruptedException {
+        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        LongAdder gain = new LongAdder();
+        IntStream.range(0, array.length)
+                .forEach(i -> executorService.submit(() -> gain.add(array[i])));
+        System.out.println("Магазин " + Thread.currentThread().getName() + " принес " + gain.sum());
+        executorService.shutdown();
     }
+
 }

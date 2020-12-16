@@ -2,21 +2,37 @@ package Toy;
 
 public class Toggle {
 
-    volatile boolean toggle;
+    int iMax = 5;
+    volatile boolean toggle = false;
 
-    public void setToggle(boolean toggle) {
-        this.toggle = toggle;
+    public void onSwitch() {
+        while (iMax != 0) {
+            try {
+                if (!toggle) {
+                    toggle = true;
+                    System.out.printf("%s -> Включаю тумблер!\n", Thread.currentThread().getName());
+                    iMax--;
+                    Thread.sleep(3000);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    public boolean isToggle() {
-        return toggle;
+    public void offSwitch() {
+        while (!Thread.currentThread().isInterrupted()) {
+            try {
+                Thread.sleep(2000);
+                if (toggle) {
+                    toggle = false;
+                    System.out.printf("%s -> Выключаю тумблер!\n", Thread.currentThread().getName());
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                break;
+            }
+        }
     }
 
-    public void onToggle(){
-        System.out.println(Thread.currentThread().getName() + " включил тумблер");
-    }
-
-    public void offToggle(){
-        System.out.println(Thread.currentThread().getName() + " выключил тумблер");
-    }
 }
