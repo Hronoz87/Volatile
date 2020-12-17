@@ -1,43 +1,28 @@
 package Nalog;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.LongAdder;
+
 public class Main {
     public static void main(String[] args) throws InterruptedException {
 
-        Shop shop = new Shop();
+        LongAdder gain = new LongAdder();
 
-        int[] array1 = new int[10];
-        int[] array2 = new int[10];
-        int[] array3 = new int[10];
+        Shop shop1 = new Shop(gain);
+        Shop shop2 = new Shop(gain);
+        Shop shop3 = new Shop(gain);
 
-        shop.addGain(array1);
-        shop.addGain(array2);
-        shop.addGain(array3);
+        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-        Thread t1 = new Thread(null, () -> {
-            try {
-                shop.gain(array1);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }, "1");
-        Thread t2 = new Thread(null, () -> {
-            try {
-                shop.gain(array2);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }, "2");
-        Thread t3 = new Thread(null, () -> {
-            try {
-                shop.gain(array3);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }, "3");
+        executorService.submit(shop1::addGain);
+        executorService.submit(shop2::addGain);
+        executorService.submit(shop3::addGain);
 
-        t1.start();
-        t2.start();
-        t3.start();
+        executorService.awaitTermination(3, TimeUnit.SECONDS);
+        System.out.println("Итоговая сумма, руб.: " + gain.sum());
+        executorService.shutdown();
     }
 
 }
